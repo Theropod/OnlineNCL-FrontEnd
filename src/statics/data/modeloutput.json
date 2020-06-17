@@ -1,0 +1,157 @@
+[
+    {
+        "label": "root",
+        "key":"root",
+        "icon": "folder_open",
+        "children": [
+            {
+                "label": "T106 Seasonal",
+                "key": "/work2/theropod/BCC/Operational_Prediction/Seasonal/",
+                "icon": "folder_open",
+                "children": [
+                    {
+                        "label": "20200101",
+                        "key": "/work2/theropod/BCC/Operational_Prediction/Seasonal/20200101/",
+                        "icon": "folder_open",
+                        "children": [
+                            {
+                                "label": "atm",
+                                "key": "/work2/theropod/BCC/Operational_Prediction/Seasonal/20200101/atm/Member/",
+                                "lazy": false,
+                                "icon": "folder_open",
+                                "children": [
+                                    {
+                                        "label": "20200101.atm.PREC.202001-202101_sfc_member.nc",
+                                        "key": "/work2/theropod/BCC/Operational_Prediction/Seasonal/20200101/atm/Member/20200101.atm.PREC.202001-202101_sfc_member.nc",
+                                        "icon": "layers",
+                                        "info": "dimensions:\n  time = UNLIMITED;//(60 currently)\n  latitude = 400;\n  longitude = 800;\nvariables:\n  float VARIABLENAME;\n  :definition = DEFINITION"
+                                    }
+                                ]
+                            },
+                            {
+                                "label": "ocn",
+                                "key": "/work2/theropod/BCC/Operational_Prediction/Seasonal/20200101/ocn/Member/",
+                                "lazy": false,
+                                "icon": "folder_open",
+                                "children": [
+                                    {
+                                        "label": "20200101.ocn.salt.202001-202101_dpt005_member.nc",
+                                        "key": "/work2/theropod/BCC/Operational_Prediction/Seasonal/20200101/ocn/Member/20200101.ocn.salt.202001-202101_dpt005_member.nc",
+                                        "icon": "layers",
+                                        "info": "dimensions:\n  time = UNLIMITED;//(60 currently)\n  latitude = 400;\n  longitude = 800;\nvariables:\n  float VARIABLENAME;\n  :definition = DEFINITION"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "label": "20200201",
+                        "key": "/work2/theropod/BCC/Operational_Prediction/Seasonal/20200201/",
+                        "icon": "folder_open",
+                        "children": [
+                            {
+                                "label": "atm",
+                                "key": "/work2/theropod/BCC/Operational_Prediction/Seasonal/20200201/atm/",
+                                "lazy": false,
+                                "icon": "folder_open",
+                                "children": [
+                                    {
+                                        "label": "20200201.atm.PS.202002-202102_sfc_member.nc",
+                                        "key": "/work2/theropod/BCC/Operational_Prediction/Seasonal/20200201/atm/Member/20200201.atm.PS.202002-202102_sfc_member.nc",
+                                        "icon": "layers",
+                                        "info": "dimensions:\n  time = UNLIMITED;//(60 currently)\n  latitude = 400;\n  longitude = 800;\nvariables:\n  float VARIABLENAME;\n  :definition = DEFINITION"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "label": "20200301",
+                        "key": "/work2/theropod/BCC/Operational_Prediction/Seasonal/20200301/",
+                        "icon": "folder_open",
+                        "children": [
+                            {
+                                "label": "ocn",
+                                "key": "/work2/theropod/BCC/Operational_Prediction/Seasonal/20200301/ocn/Member/",
+                                "lazy": false,
+                                "icon": "folder_open",
+                                "children": [
+                                    {
+                                        "label": "20200301.ocn.salt.202003-202103_dpt165_member.nc",
+                                        "key": "/work2/theropod/BCC/Operational_Prediction/Seasonal/20200301/ocn/Member/20200301.ocn.salt.202003-202103_dpt165_member.nc",
+                                        "icon": "layers",
+                                        "info": "dimensions:\n  time = UNLIMITED;//(60 currently)\n  latitude = 400;\n  longitude = 800;\nvariables:\n  float VARIABLENAME;\n  :definition = DEFINITION"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "label": "T226 S2S",
+                "key": "/work2/theropod/BCC/Operational_Prediction/S2S/",
+                "icon": "folder_open",
+                "children": [
+                    {
+                        "label": "20200406",
+                        "key": "/work2/theropod/BCC/Operational_Prediction/S2S/20200406/daily/",
+                        "icon": "folder_open",
+                        "children": [
+                            {
+                                "label": "daily_bcccsm_2020040600_T.nc",
+                                "key": "/work2/theropod/BCC/Operational_Prediction/S2S/20200406/daily/daily_bcccsm_2020040600_T.nc",
+                                "icon": "layers",
+                                "info": "dimensions:\n  time = UNLIMITED;//(60 currently)\n  latitude = 400;\n  longitude = 800;\nvariables:\n  float VARIABLENAME;\n  :definition = DEFINITION"
+                            },
+                            {
+                                "label": "daily_bcccsm_2020040600_PRECT.nc",
+                                "key": "/work2/theropod/BCC/Operational_Prediction/S2S/20200406/daily/daily_bcccsm_2020040600_PRECT.nc",
+                                "icon": "layers",
+                                "info": "dimensions:\n  time = UNLIMITED;//(60 currently)\n  latitude = 400;\n  longitude = 800;\nvariables:\n  float VARIABLENAME;\n  :definition = DEFINITION"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "20200407",
+                        "key": "/work2/theropod/BCC/Operational_Prediction/S2S/20200407/daily/",
+                        "icon": "folder_open",
+                        "children": [
+                            {
+                                "label": "daily_bcccsm_2020040700_SST.nc",
+                                "key": "/work2/theropod/BCC/Operational_Prediction/S2S/20200407/daily/daily_bcccsm_2020040700_SST.nc",
+                                "icon": "layers",
+                                "info": "dimensions:\n  time = UNLIMITED;//(60 currently)\n  latitude = 400;\n  longitude = 800;\nvariables:\n  float VARIABLENAME;\n  :definition = DEFINITION"
+                            },
+                            {
+                                "label": "daily_bcccsm_2020040700_Z3.nc",
+                                "key": "/work2/theropod/BCC/Operational_Prediction/S2S/20200407/daily/daily_bcccsm_2020040700_Z3.nc",
+                                "icon": "layers",
+                                "info": "dimensions:\n  time = UNLIMITED;//(60 currently)\n  latitude = 400;\n  longitude = 800;\nvariables:\n  float VARIABLENAME;\n  :definition = DEFINITION"
+                            }
+                        ]
+                    },
+                    {
+                        "label": "20200408",
+                        "key": "/work2/theropod/BCC/Operational_Prediction/S2S/20200408/daily/",
+                        "icon": "folder_open",
+                        "children": [
+                            {
+                                "label": "daily_bcccsm_2020040800_PS.nc",
+                                "key": "/work2/theropod/BCC/Operational_Prediction/S2S/20200408/daily/daily_bcccsm_2020040800_PS.nc",
+                                "icon": "layers",
+                                "info": "dimensions:\n  time = UNLIMITED;//(60 currently)\n  latitude = 400;\n  longitude = 800;\nvariables:\n  float VARIABLENAME;\n  :definition = DEFINITION"
+                            },
+                            {
+                                "label": "daily_bcccsm_2020040800_T.nc",
+                                "key": "/work2/theropod/BCC/Operational_Prediction/S2S/20200408/daily/daily_bcccsm_2020040800_T.nc",
+                                "icon": "layers",
+                                "info": "dimensions:\n  time = UNLIMITED;//(60 currently)\n  latitude = 400;\n  longitude = 800;\nvariables:\n  float VARIABLENAME;\n  :definition = DEFINITION"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]
