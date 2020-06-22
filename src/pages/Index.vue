@@ -1,124 +1,153 @@
 <template>
   <q-page class>
-    <!-- 4:8 in when > small and stack vertically on small devices  -->
-    <div class="q-pa-sm">
-      <q-card class="my-card q-pa-md">
-        <div class="text-h5 q-mt-sm q-mb-sm">File Select</div>
-        <q-input ref="filter" filled v-model="filter" label=" Filename Filter... ">
-          <template v-slot:append>
-            <q-icon v-if="filter !== ''" name="clear" class="cursor-pointer" @click="resetFilter" />
-          </template>
-        </q-input>
-        <!-- node key must be unique, using file path as key -->
-        <!-- leaves will be lazy loaded, in next version -->
-        <q-tree
-          :nodes="fileTree"
-          ref="qfileTree"
-          node-key="key"
-          :filter="filter"
-          :filter-method="myFilterMethod"
-          :tick-strategy="tickStrategy"
-          :ticked.sync="tickedLabels"
-          @update:ticked="onTickedUpdate"
-          :expanded.sync="expanded"
-        />
-      </q-card>
+    <!-- file selection -->
+    <q-card class="my-card bg-grey-1">
+      <div class="q-pa-md">
+        <div class="row q-gutter-sm justify-between items-center">
+          <div class="col-12 col-sm-1 text-h5 q-mt-sm q-mb-sm">File Filters:</div>
+          <div
+            v-for="(modelFileFilter,index) in modelFileFilters"
+            :key="index"
+            class="col-12 col-sm-3 q-qa-sm"
+          >
+            <q-select
+              filled
+              v-model="modelFileFilter.selected"
+              :options="modelFileFilter.filterValues"
+              :label="modelFileFilter.filterName"
+            />
+          </div>
+          <div class="col-12 col-sm-1 q-qa-sm">
+            <q-btn color="primary" label="Search" class="q-ma-sm q-qa-sm" />
+          </div>
+        </div>
+        <div class="q-ma-sm text-body1">Search Results:</div>
+        <div class="row q-gutter-sm justify-start">
+          <q-list
+            dense
+            class="rounded-borders col-12 col-sm-3"
+            v-for="(modelFile, index) in modelFiles"
+            :key="index"
+          >
+            <q-item tag="label" v-ripple>
+              <q-item-section avatar>
+                <q-checkbox
+                  v-model="tickedLabels"
+                  :val="modelFile.filename"
+                  @input="onTickedUpdate"
+                  :ref="modelFile.filename"
+                />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label style="word-wrap:break-word">{{modelFile.filename}}</q-item-label>
+                <q-item-label caption>{{modelFile.fileInfo}}</q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </div>
+      </div>
+    </q-card >
+    <q-separator inset />
+    <!-- taskForm and Results -->
+    <!-- 4:8 in when > breakpoint "small/sm" and stack vertically when < sm on small devices  -->
+    <div class="text-h5 q-ma-md">
+      Task and Result
+      <q-toggle
+        true-value="Expanded"
+        false-value="Folded"
+        indeterminate-value="Expanded Not Set"
+        :label="`All Task Result ${allTaskExpanded}`"
+        v-model="allTaskExpanded"
+        class="text-body1"
+        @input="onAllTaskExpandedToggle"
+      />
     </div>
-    <div class="row q-pa-sm q-gutter-sm">
-      <div class="col-12 col-sm-4">
-        <q-card class="my-card q-pa-md">
-          <div class="text-h5 q-ma-md">Function Script</div>
-          <!-- `ticked-${tick}` is ES6 template grammar -->
-          <!-- <div v-for="tick in tickedLabels" :key="`ticked-${tick}`"> -->
-          <div v-for="(scriptForm,index) in scriptForms" :key="index">
-            <q-form class="q-gutter-md q-card q-ma-sm q-pa-sm">
-              <!-- form header -->
-              <div class="q-gutter-sm scriptform-header">
-                <!-- will use drawingscripts.json to bind a selective menu here, and determine form fields baed on selection-->
-                <div class="text-h6">{{ scriptForm.label }}</div>
-              </div>
-              <!-- form body -->
-              <div class="row q-gutter-md items-start scriptform-body">
-                <!-- script form fields -->
-                <div class="col q-gutter-sm q-ml-none q-mt-none">
-                  <div class="row">
-                    <q-select
-                      filled
-                      v-model="scriptForm.selectedScript"
-                      :options="scriptForm.scripts"
-                      label="Select Script Function"
-                      style="width: 300px"
-                      class="col-12 q-ma-sm"
-                    />
-                    <div
-                      v-for="(parameter,index) in scriptForm.scriptsInfo[scriptForm.scripts.indexOf(scriptForm.selectedScript)].parameters"
-                      :key="index"
-                      class="col-6 q-ma-sm"
-                      style="width: 200px"
-                    >
-                      <q-input
+    <q-expansion-item
+      expand-separator
+      v-for="(taskForm,index) in taskForms"
+      :key="index"
+      v-model="taskForm.expanded"
+      :label="taskForm.label"
+      class="text-subtitle1"
+      @input="onTaskFormExpandedChange"
+    >
+      <q-card flat class="q-ma-sm">
+        <div class="my-row row q-gutter-sm">
+          <div class="col-12 col-sm-4">
+            <div class="q-pa-sm">
+              <q-form class="q-gutter-md q-pa-sm">
+                <!-- form body -->
+                <div class="row q-gutter-md q-mt-none items-start taskForm-body">
+                  <!-- script form fields -->
+                  <!-- will use drawingscripts.json to bind a selective menu here, and determine form fields baed on selection-->
+                  <div class="col q-gutter-sm q-ml-none q-mt-none">
+                    <div class="row">
+                      <q-select
                         filled
-                        v-model="parameter.value"
-                        :label="parameter.description"
-                        :hint="parameter.hint"
-                        :type="parameter.type"
-                        :readonly="parameter.readonly"
+                        v-model="taskForm.selectedScript"
+                        :options="taskForm.scripts"
+                        hint="select ncl function to run"
+                        label="Select Script Function"
+                        class="col-7 col-sm-6 q-ma-sm"
                       />
-                    </div>
-                    <!-- buttons -->
-                    <div class="row col-12 q-ma-sm items-start scriptform-footer">
-                      <q-btn
-                        label="Run"
-                        :disabled="scriptForm.disabled"
-                        @click="onDrawingSubmit(scriptForm)"
-                        color="primary"
-                      />
-                      <q-btn
-                        label="Reset"
-                        @click="onDrawingReset(scriptForm)"
-                        color="primary"
-                        flat
-                        class="q-ml-sm"
-                      />
-                      <q-btn
-                        label="Remove"
-                        @click="onRemove(scriptForm.key)"
-                        color="red"
-                        flat
-                        class="q-ml-sm"
-                      />
+                      <div
+                        v-for="(parameter,index) in taskForm.scriptsInfo[taskForm.scripts.indexOf(taskForm.selectedScript)].parameters"
+                        :key="index"
+                        class="col-6 col-sm-5 q-ma-sm"
+                      >
+                        <q-input
+                          filled
+                          v-model="parameter.value"
+                          :label="parameter.description"
+                          :hint="parameter.hint"
+                          :type="parameter.type"
+                          :readonly="parameter.readonly"
+                        />
+                      </div>
+                      <!-- buttons -->
+                      <div class="row col-12 q-ma-sm items-start taskForm-footer">
+                        <q-btn
+                          label="Run"
+                          :disabled="taskForm.disabled"
+                          @click="onScriptSubmit(taskForm)"
+                          color="primary"
+                        />
+                        <q-btn
+                          label="Reset"
+                          @click="onScriptReset(taskForm)"
+                          color="primary"
+                          flat
+                          class="q-ml-sm"
+                        />
+                        <q-btn
+                          label="Remove"
+                          @click="onScriptRemove(taskForm.key)"
+                          color="red"
+                          flat
+                          class="q-ml-sm"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
-                <!-- file information and script information -->
-                <div class="col q-gutter-sm q-mr-none q-mt-none">
-                  <div class="text-bold">File Information</div>
-                  <p style="white-space: pre;">{{ scriptForm.info }}</p>
-                  <div class="text-bold">Script Information</div>
-                  <p
-                    style="white-space: pre;"
-                    class="q-mb-none"
-                  >{{ scriptForm.scriptsInfo[scriptForm.scripts.indexOf(scriptForm.selectedScript)].description }}</p>
-                </div>
-              </div>
-            </q-form>
+              </q-form>
+            </div>
           </div>
-        </q-card>
-      </div>
-      <div class="col">
-        <q-card class="my-card q-pa-md">
-          <!-- Result Pictures -->
-          <div class="text-h5 q-ma-md">Result</div>
-          <div class="div q-ma-sm" v-for="(outputfilename,index) in scriptOutputFiles" :key="index">
-            <div class="text-bold q-ma-sm">{{outputfilename}}</div>
-            <q-img
+          <q-separator vertical inset class="q-ma-sm" />
+          <div class="col-12 col-sm">
+            <div class="q-pa-sm">
+              <!-- Result Pictures -->
+              <div class="text-bold q-ma-sm">{{taskForm.scriptOutputFile}}</div>
+              <q-img :src=" '../statics/data/' + taskForm.scriptOutputFile" spinner-color="white" />
+              <!-- <q-img
               :src="`http://166.111.7.71:8080/online-ncl/getImage?filename=${outputfilename}`"
               spinner-color="white"
-            />
+              />-->
+            </div>
           </div>
-        </q-card>
-      </div>
-    </div>
+        </div>
+      </q-card>
+    </q-expansion-item>
   </q-page>
 </template>
 
@@ -128,36 +157,76 @@ import modeloutput from "../statics/data/modeloutput.json";
 import drawingscripts from "../statics/data/drawingscripts.json";
 
 // function to retrieve object based on its key
-function getObjectByKey(key, parent) {
-  const stack = [];
-  let node, ii;
-  stack.push(parent);
-
-  while (stack.length > 0) {
-    node = stack.pop();
-    if (node.key == key) {
-      return [node]; // return whatever you want here!!!
-    } else if (node.children && node.children.length) {
-      for (ii = 0; ii < node.children.length; ii += 1) {
-        stack.push(node.children[ii]);
-      }
+function getObjectByFilename(key, parent) {
+  for (let item in parent) {
+    if (parent[item].filename == key) {
+      return [item];
     }
   }
   return null;
+}
+
+function updateAllTaskExpandedState(taskForms){
+  if (taskForms.length) {
+    let has_expanded = false;
+    let all_expanded = true;
+    for (let i in taskForms) {
+      all_expanded = all_expanded && taskForms[i].expanded;
+      has_expanded = has_expanded || taskForms[i].expanded;
+    }
+    if (all_expanded) return "Expanded";
+    else if (!has_expanded) return "Folded";
+    else return "Expanded Not Set";
+    return;
+  }
+  return "Expanded";
 }
 
 export default {
   name: "Index",
   data() {
     return {
-      fileTree: modeloutput,
-      filter: "",
       tickedLabels: [],
-      scriptForms: [],
+      taskForms: [],
+      allTaskExpanded: "Expanded",
       drawingScripts: drawingscripts,
-      scriptOutputFiles: [],
-      expanded: ["root"],
-      tickStrategy: "leaf"
+      modelFileFilters: [
+        {
+          filterName: "model",
+          filterValues: ["S2S_T226", "Seasonal_T106"],
+          selected: "S2S_T226"
+        },
+        {
+          filterName: "startTime",
+          filterValues: ["20200406", "20200407", "20200101"],
+          selected: "20200406"
+        },
+        {
+          filterName: "variableName",
+          filterValues: ["PRECT", "T"],
+          selected: "PRECT"
+        }
+      ],
+      modelFiles: [
+        {
+          id: 1,
+          filename: "daily_bcccsm_2020040600_PRECT.nc",
+          model: "S2S_T226",
+          startTime: "20200406",
+          variableName: "PRECT",
+          path: "/Operational_Prediction/S2S_T226/PRECT/20200406",
+          fileInfo: "file_info1"
+        },
+        {
+          id: 2,
+          filename: "daily_bcccsm_2020040600p01_PRECT.nc",
+          model: "S2S_T226",
+          startTime: "20200406",
+          variableName: "PRECT",
+          path: "/Operational_Prediction/S2S_T226/PRECT/20200406",
+          fileInfo: "file_info2"
+        }
+      ]
     };
   },
   methods: {
@@ -170,65 +239,84 @@ export default {
       this.$refs.filter.focus();
     },
     onTickedUpdate(ticked) {
-      let scriptFormkeys = [];
+      let taskFormkeys = [];
       // index to remove
-      let scriptForms_toremove = [];
+      let taskForms_toremove = [];
       // keys to add
-      let scriptForms_toadd = [];
-      for (let i in this.scriptForms) {
-        scriptFormkeys.push(this.scriptForms[i].key);
+      let taskForms_toadd = [];
+      for (let i in this.taskForms) {
+        taskFormkeys.push(this.taskForms[i].key);
       }
       //tick added
-      if (ticked.length > scriptFormkeys.length) {
+      if (ticked.length > taskFormkeys.length) {
         for (let i in ticked) {
-          if (scriptFormkeys.includes(ticked[i])) {
+          if (taskFormkeys.includes(ticked[i])) {
           } else {
-            scriptForms_toadd.push(ticked[i]);
+            taskForms_toadd.push(ticked[i]);
           }
         }
-        while (scriptForms_toadd.length) {
-          let tickedKey = scriptForms_toadd.pop();
-          this.scriptForms.push({
-            label: getObjectByKey(tickedKey, this.fileTree[0])[0].label,
+        while (taskForms_toadd.length) {
+          let tickedKey = taskForms_toadd.pop();
+          this.taskForms.push({
+            label: tickedKey,
+            // key must not duplicates
             key: tickedKey,
-            info: getObjectByKey(tickedKey, this.fileTree[0])[0].info,
+            info: getObjectByFilename(tickedKey, this.modelFiles)[0],
             selectedScript: this.drawingScripts.scriptNames[0],
             scripts: this.drawingScripts.scriptNames,
             // deep copy
             scriptsInfo: JSON.parse(
               JSON.stringify(this.drawingScripts.scriptsInfo)
             ),
-            disabled: false
+            scriptOutputFile:
+            "daily_bcccsm_2020040600_T_latlon_plot_21_24_100_CN.png",
+            disabled: false,
+            expanded: true
           });
         }
       }
       //tick removed
-      else if (ticked.length < scriptFormkeys.length) {
-        for (let j in scriptFormkeys) {
-          if (ticked.includes(scriptFormkeys[j])) {
+      else if (ticked.length < taskFormkeys.length) {
+        for (let j in taskFormkeys) {
+          if (ticked.includes(taskFormkeys[j])) {
           } else {
-            scriptForms_toremove.push(j);
+            taskForms_toremove.push(j);
           }
         }
-        while (scriptForms_toremove.length) {
-          this.scriptForms.splice(scriptForms_toremove.pop(), 1);
+        while (taskForms_toremove.length) {
+          this.taskForms.splice(taskForms_toremove.pop(), 1);
+        }
+      }
+      // update All expanded state
+      this.allTaskExpanded=updateAllTaskExpandedState(this.taskForms);
+    },
+    onAllTaskExpandedToggle(state) {
+      if (state == "Expanded") {
+        for (let i in this.taskForms) {
+          this.taskForms[i].expanded = true;
+        }
+      } else if (state == "Folded") {
+        for (let i in this.taskForms) {
+          this.taskForms[i].expanded = false;
         }
       }
     },
-    onDrawingSubmit(scriptForm) {
+    onTaskFormExpandedChange(state) {
+      // update All expanded state
+      this.allTaskExpanded=updateAllTaskExpandedState(this.taskForms);
+    },
+    onScriptSubmit(taskForm) {
       // disable run button
-      scriptForm.disabled = true;
+      taskForm.disabled = true;
       // generate filename, scriptname, parameters, outputfile for api
-      let filename = scriptForm.key;
-      let scriptname = scriptForm.selectedScript;
+      let filename = taskForm.key;
+      let scriptname = taskForm.selectedScript;
       let scriptpath =
-        scriptForm.scriptsInfo[
-          scriptForm.scripts.indexOf(scriptForm.selectedScript)
-        ].path;
+        taskForm.scriptsInfo[taskForm.scripts.indexOf(taskForm.selectedScript)]
+          .path;
       let parameters =
-        scriptForm.scriptsInfo[
-          scriptForm.scripts.indexOf(scriptForm.selectedScript)
-        ].parameters;
+        taskForm.scriptsInfo[taskForm.scripts.indexOf(taskForm.selectedScript)]
+          .parameters;
       // check for empty
       for (let i in parameters) {
         let parameter = parameters[i];
@@ -239,11 +327,11 @@ export default {
       }
       // outputfile: filename_scriptname_parameters.png
       // filename without extension
-      let outputfile = scriptForm.label.substring(
+      let outputfile = taskForm.label.substring(
         0,
-        scriptForm.label.lastIndexOf(".")
+        taskForm.label.lastIndexOf(".")
       );
-      outputfile = outputfile + "_" + scriptForm.selectedScript;
+      outputfile = outputfile + "_" + taskForm.selectedScript;
       // add parameter values
       for (let i in parameters) {
         let parameter = parameters[i];
@@ -280,27 +368,30 @@ export default {
           }
         });
       // enable run button
-      scriptForm.disabled = false;
+      taskForm.disabled = false;
     },
-    onDrawingReset(scriptForm) {
+    onScriptReset(taskForm) {
       let a = 0;
-      for (let parameter of scriptForm.scriptsInfo[
-        scriptForm.scripts.indexOf(scriptForm.selectedScript)
+      for (let parameter of taskForm.scriptsInfo[
+        taskForm.scripts.indexOf(taskForm.selectedScript)
       ].parameters) {
         parameter.value = null;
       }
       let b = 1;
     },
-    onRemove(scriptFormkey) {
-      let a = 0;
-      this.$refs.qfileTree.setTicked(scriptFormkey, false);
-      let b = 1;
+    onScriptRemove(taskFormkey) {
+      // let a = 0;
+      let checkbox = this.$refs[taskFormkey];
+      checkbox[0].toggle();
+      // let b = 1;
+      // let index = this.tickedLabels.indexOf(taskFormkey);
+      // if (index > -1) {
+      //   this.tickedLabels.splice(index, 1);
+      // }
     }
   }
 };
 </script>
 
 <style lang="sass" scoped>
-.my-card
-  width: 100%
 </style>

@@ -11,10 +11,10 @@
         />
 
         <q-toolbar-title>
-          Online NCL
+          BCC模式数据在线分析
         </q-toolbar-title>
 
-        <div>Version 0.0.1</div>
+        <div>Version 1.0.0</div>
       </q-toolbar>
     </q-header>
 

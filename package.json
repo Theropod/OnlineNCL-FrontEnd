@@ -1,6 +1,6 @@
 {
   "name": "quasar-online-ncl",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "A Quasar Framework app",
   "productName": "Online NCL",
   "cordovaId": "edu.tsinghua.dess.esil.online-ncl",
