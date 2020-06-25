@@ -1,52 +1,61 @@
 <template>
   <q-page class>
     <!-- file selection -->
-    <q-card class="my-card bg-grey-1">
-      <div class="q-pa-md">
-        <div class="row q-gutter-sm justify-between items-center">
-          <div class="col-12 col-sm-1 text-h5 q-mt-sm q-mb-sm">File Filters:</div>
-          <div
-            v-for="(modelFileFilter,index) in modelFileFilters"
-            :key="index"
-            class="col-12 col-sm-3 q-qa-sm"
-          >
-            <q-select
-              filled
-              v-model="modelFileFilter.selected"
-              :options="modelFileFilter.filterValues"
-              :label="modelFileFilter.filterName"
-            />
-          </div>
-          <div class="col-12 col-sm-1 q-qa-sm">
-            <q-btn color="primary" label="Search" class="q-ma-sm q-qa-sm" />
-          </div>
+    <q-card class="my-card bg-grey-1 q-pa-md">
+      <div class="row q-gutter-sm justify-between items-center">
+        <div class="col-12 col-sm-1 text-h5 q-mt-sm q-mb-sm">File Filters:</div>
+        <div
+          v-for="(modelFileFilter,index) in modelFileFilters"
+          :key="index"
+          class="col-12 col-sm-2 q-qa-sm"
+        >
+          <q-select
+            filled
+            v-model="modelFileFilter.selected"
+            :options="modelFileFilter.filterValues"
+            :label="modelFileFilter.filterName"
+            @input="updateFilters"
+          />
         </div>
-        <div class="q-ma-sm text-body1">Search Results:</div>
-        <div class="row q-gutter-sm justify-start">
-          <q-list
-            dense
-            class="rounded-borders col-12 col-sm-3"
-            v-for="(modelFile, index) in modelFiles"
-            :key="index"
-          >
-            <q-item tag="label" v-ripple>
-              <q-item-section avatar>
-                <q-checkbox
-                  v-model="tickedLabels"
-                  :val="modelFile.filename"
-                  @input="onTickedUpdate"
-                  :ref="modelFile.filename"
-                />
-              </q-item-section>
-              <q-item-section>
-                <q-item-label style="word-wrap:break-word">{{modelFile.filename}}</q-item-label>
-                <q-item-label caption>{{modelFile.fileInfo}}</q-item-label>
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </div>
+        <q-btn
+          color="primary"
+          label="Search"
+          class="col-12 col-sm-1 q-pa-sm"
+          @click="SearchByFilters"
+        />
+        <q-btn
+          label="Reset"
+          @click="onModelFileFilterReset"
+          color="red"
+          flat
+          class="col-12 col-sm-1 q-pa-sm"
+        />
       </div>
-    </q-card >
+      <div class="q-ma-sm text-body1">Search Results:</div>
+      <div class="row q-gutter-sm justify-start">
+        <q-list
+          dense
+          class="rounded-borders col-12 col-sm-3"
+          v-for="(modelFile, index) in modelFiles"
+          :key="index"
+        >
+          <q-item tag="label" v-ripple>
+            <q-item-section avatar>
+              <q-checkbox
+                v-model="tickedLabels"
+                :val="modelFile.filename"
+                @input="onTickedUpdate"
+                :ref="modelFile.filename"
+              />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label style="word-wrap:break-word">{{modelFile.filename}}</q-item-label>
+              <q-item-label caption>{{modelFile.fileInfo}}</q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </div>
+    </q-card>
     <q-separator inset />
     <!-- taskForm and Results -->
     <!-- 4:8 in when > breakpoint "small/sm" and stack vertically when < sm on small devices  -->
@@ -69,6 +78,7 @@
       v-model="taskForm.expanded"
       :label="taskForm.label"
       class="text-subtitle1"
+      header-class="bg-grey-8 text-white"
       @input="onTaskFormExpandedChange"
     >
       <q-card flat class="q-ma-sm">
@@ -138,11 +148,17 @@
             <div class="q-pa-sm">
               <!-- Result Pictures -->
               <div class="text-bold q-ma-sm">{{taskForm.scriptOutputFile}}</div>
-              <q-img :src=" '../statics/data/' + taskForm.scriptOutputFile" spinner-color="white" />
-              <!-- <q-img
-              :src="`http://166.111.7.71:8080/online-ncl/getImage?filename=${outputfilename}`"
-              spinner-color="white"
-              />-->
+              <!-- <q-img :src=" '../statics/data/' + taskForm.scriptOutputFile" spinner-color="white" /> -->
+              <q-img
+                v-if="taskForm.scriptOutputFile == 'run script to generate image'"
+                src
+                spinner-color="white"
+              />
+              <q-img
+                v-else
+                :src="`http://166.111.7.71:8080/online-ncl/ncl-wrapper/getImage?filename=${taskForm.scriptOutputFile}`"
+                spinner-color="white"
+              />
             </div>
           </div>
         </div>
@@ -153,20 +169,48 @@
 
 <script>
 // a simple way to import data
-import modeloutput from "../statics/data/modeloutput.json";
 import drawingscripts from "../statics/data/drawingscripts.json";
-
+// function to retrieve file filters based on selection
+function updateModelFileFilters(modelFileFilters) {
+  // model: position 0, startTime: position 1, variableName: position 2
+  for (let i in modelFileFilters) {
+    let selectedFilterValue = modelFileFilters[i].selected;
+    if (!selectedFilterValue.length) {
+      let url =
+        "http://166.111.7.71:8080/online-ncl/model-file-manager/findModelFileFilter?columnName=" +
+        modelFileFilters[i].columnName +
+        "&model=" +
+        modelFileFilters[0].selected +
+        "&startTime=" +
+        modelFileFilters[1].selected +
+        "&variableName=" +
+        modelFileFilters[2].selected;
+      fetch(url)
+        .then(response => response.json())
+        .then(data => {
+          if (data.status == "success") {
+            modelFileFilters[i].filterValues = data.result;
+          } else {
+            console.log(data);
+          }
+        });
+    } else {
+      // only preserve one selection item
+      modelFileFilters[i].filterValues = [modelFileFilters[i].selected];
+    }
+  }
+}
 // function to retrieve object based on its key
 function getObjectByFilename(key, parent) {
   for (let item in parent) {
     if (parent[item].filename == key) {
-      return [item];
+      return parent[item];
     }
   }
   return null;
 }
-
-function updateAllTaskExpandedState(taskForms){
+//
+function updateAllTaskExpandedState(taskForms) {
   if (taskForms.length) {
     let has_expanded = false;
     let all_expanded = true;
@@ -193,50 +237,75 @@ export default {
       modelFileFilters: [
         {
           filterName: "model",
-          filterValues: ["S2S_T226", "Seasonal_T106"],
-          selected: "S2S_T226"
+          columnName: "model",
+          filterValues: [],
+          selected: ""
         },
         {
           filterName: "startTime",
-          filterValues: ["20200406", "20200407", "20200101"],
-          selected: "20200406"
+          columnName: "start_time",
+          filterValues: [],
+          selected: ""
         },
         {
           filterName: "variableName",
-          filterValues: ["PRECT", "T"],
-          selected: "PRECT"
+          columnName: "variable_name",
+          filterValues: [],
+          selected: ""
         }
       ],
-      modelFiles: [
-        {
-          id: 1,
-          filename: "daily_bcccsm_2020040600_PRECT.nc",
-          model: "S2S_T226",
-          startTime: "20200406",
-          variableName: "PRECT",
-          path: "/Operational_Prediction/S2S_T226/PRECT/20200406",
-          fileInfo: "file_info1"
-        },
-        {
-          id: 2,
-          filename: "daily_bcccsm_2020040600p01_PRECT.nc",
-          model: "S2S_T226",
-          startTime: "20200406",
-          variableName: "PRECT",
-          path: "/Operational_Prediction/S2S_T226/PRECT/20200406",
-          fileInfo: "file_info2"
-        }
-      ]
+      modelFiles: []
     };
   },
   methods: {
-    myFilterMethod(node, filter) {
-      const filt = filter.toLowerCase();
-      return node.label && node.label.toLowerCase().indexOf(filt) > -1;
+    updateFilters() {
+      updateModelFileFilters(this.modelFileFilters);
     },
-    resetFilter() {
-      this.filter = "";
-      this.$refs.filter.focus();
+    onModelFileFilterReset() {
+      for (let i in this.modelFileFilters) {
+        this.modelFileFilters[i].selected = "";
+      }
+      updateModelFileFilters(this.modelFileFilters);
+    },
+    SearchByFilters() {
+      let modelFileFilters = this.modelFileFilters;
+      if (
+        modelFileFilters[0].selected.length &&
+        modelFileFilters[1].selected.length &&
+        modelFileFilters[2].selected.length
+      ) {
+        let url =
+          "http://166.111.7.71:8080/online-ncl/model-file-manager/findModelFile?model=" +
+          modelFileFilters[0].selected +
+          "&startTime=" +
+          modelFileFilters[1].selected +
+          "&variableName=" +
+          modelFileFilters[2].selected;
+        fetch(url)
+          .then(response => response.json())
+          .then(data => {
+            if (data.status == "success") {
+              this.modelFiles = data.result;
+            } else {
+              console.log(data);
+            }
+          });
+      } else {
+        this.$q
+          .dialog({
+            title: "Alert",
+            message: "Please select all filters"
+          })
+          .onOk(() => {
+            console.log("OK");
+          })
+          .onCancel(() => {
+            console.log("Cancel");
+          })
+          .onDismiss(() => {
+            console.log("I am triggered on both OK and Cancel");
+          });
+      }
     },
     onTickedUpdate(ticked) {
       let taskFormkeys = [];
@@ -261,15 +330,14 @@ export default {
             label: tickedKey,
             // key must not duplicates
             key: tickedKey,
-            info: getObjectByFilename(tickedKey, this.modelFiles)[0],
+            info: getObjectByFilename(tickedKey, this.modelFiles),
             selectedScript: this.drawingScripts.scriptNames[0],
             scripts: this.drawingScripts.scriptNames,
             // deep copy
             scriptsInfo: JSON.parse(
               JSON.stringify(this.drawingScripts.scriptsInfo)
             ),
-            scriptOutputFile:
-            "daily_bcccsm_2020040600_T_latlon_plot_21_24_100_CN.png",
+            scriptOutputFile: "run script to generate image",
             disabled: false,
             expanded: true
           });
@@ -288,7 +356,7 @@ export default {
         }
       }
       // update All expanded state
-      this.allTaskExpanded=updateAllTaskExpandedState(this.taskForms);
+      this.allTaskExpanded = updateAllTaskExpandedState(this.taskForms);
     },
     onAllTaskExpandedToggle(state) {
       if (state == "Expanded") {
@@ -303,13 +371,13 @@ export default {
     },
     onTaskFormExpandedChange(state) {
       // update All expanded state
-      this.allTaskExpanded=updateAllTaskExpandedState(this.taskForms);
+      this.allTaskExpanded = updateAllTaskExpandedState(this.taskForms);
     },
     onScriptSubmit(taskForm) {
       // disable run button
       taskForm.disabled = true;
       // generate filename, scriptname, parameters, outputfile for api
-      let filename = taskForm.key;
+      let filename = taskForm.info.path;
       let scriptname = taskForm.selectedScript;
       let scriptpath =
         taskForm.scriptsInfo[taskForm.scripts.indexOf(taskForm.selectedScript)]
@@ -341,7 +409,7 @@ export default {
       }
       outputfile = outputfile.replace(/ /g, "_");
 
-      let url = "http://166.111.7.71:8080/online-ncl/run";
+      let url = "http://166.111.7.71:8080/online-ncl/ncl-wrapper/run";
       let postdata = {
         filename: filename,
         scriptname: scriptname,
@@ -350,6 +418,10 @@ export default {
         parameters: parameters
       };
 
+      this.$q.loading.show({
+        message:
+          'NCL Scripg <b>Running</b>.<br/><span class="text-primary">Hang on...</span>'
+      });
       fetch(url, {
         method: "POST", // or 'PUT'
         body: JSON.stringify(postdata), // data can be `string` or {object}!
@@ -360,11 +432,18 @@ export default {
         .then(res => res.json())
         .catch(error => console.error("Error:", error))
         .then(response => {
+          this.$q.loading.hide();
           if (response.status == "Success") {
-            this.scriptOutputFiles.push(response.outputFilename);
-            alert("NCL Script Successfully Executed");
+            taskForm.scriptOutputFile = response.outputFilename;
+            this.$q.dialog({
+              title: "Result",
+              message: "NCL Script Successfully Executed"
+            });
           } else {
-            alert("Script Failed to get output file!");
+            this.$q.dialog({
+              title: "Result",
+              message: "Script Failed to get output file!"
+            });
           }
         });
       // enable run button
@@ -389,6 +468,9 @@ export default {
       //   this.tickedLabels.splice(index, 1);
       // }
     }
+  },
+  mounted() {
+    updateModelFileFilters(this.modelFileFilters);
   }
 };
 </script>
