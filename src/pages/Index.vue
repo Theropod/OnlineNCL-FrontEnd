@@ -78,7 +78,7 @@
       v-model="taskForm.expanded"
       :label="taskForm.label"
       class="text-subtitle1"
-      header-class="bg-grey-8 text-white"
+      header-class="bg-grey-4 "
       @input="onTaskFormExpandedChange"
     >
       <q-card flat class="q-ma-sm">
