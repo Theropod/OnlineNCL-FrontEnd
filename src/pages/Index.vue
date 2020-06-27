@@ -3,7 +3,7 @@
     <!-- file selection -->
     <q-card class="my-card bg-grey-1 q-pa-md">
       <div class="row q-gutter-sm justify-between items-center">
-        <div class="col-12 col-sm-1 text-h5 q-mt-sm q-mb-sm">File Filters:</div>
+        <div class="col-12 col-sm-1 text-h5 q-mt-sm q-mb-sm">文件过滤:</div>
         <div
           v-for="(modelFileFilter,index) in modelFileFilters"
           :key="index"
@@ -17,21 +17,16 @@
             @input="updateFilters"
           />
         </div>
+        <q-btn color="primary" label="搜索" class="col-12 col-sm-1 q-pa-sm" @click="SearchByFilters" />
         <q-btn
-          color="primary"
-          label="Search"
-          class="col-12 col-sm-1 q-pa-sm"
-          @click="SearchByFilters"
-        />
-        <q-btn
-          label="Reset"
+          label="重置"
           @click="onModelFileFilterReset"
           color="red"
           flat
           class="col-12 col-sm-1 q-pa-sm"
         />
       </div>
-      <div class="q-ma-sm text-body1">Search Results:</div>
+      <div class="q-ma-sm text-body1">搜索结果:</div>
       <div class="row q-gutter-sm justify-start">
         <q-list
           dense
@@ -60,12 +55,12 @@
     <!-- taskForm and Results -->
     <!-- 4:8 in when > breakpoint "small/sm" and stack vertically when < sm on small devices  -->
     <div class="text-h5 q-ma-md">
-      Task and Result
+      脚本任务
       <q-toggle
-        true-value="Expanded"
-        false-value="Folded"
-        indeterminate-value="Expanded Not Set"
-        :label="`All Task Result ${allTaskExpanded}`"
+        true-value="展开"
+        false-value="折叠"
+        indeterminate-value="待确定展开状态"
+        :label="`全部${allTaskExpanded}`"
         v-model="allTaskExpanded"
         class="text-body1"
         @input="onAllTaskExpandedToggle"
@@ -76,7 +71,7 @@
       v-for="(taskForm,index) in taskForms"
       :key="index"
       v-model="taskForm.expanded"
-      :label="taskForm.label"
+      :label="index+1 + `. ` + taskForm.label"
       class="text-subtitle1"
       header-class="bg-grey-4 "
       @input="onTaskFormExpandedChange"
@@ -96,8 +91,8 @@
                         filled
                         v-model="taskForm.selectedScript"
                         :options="taskForm.scripts"
-                        hint="select ncl function to run"
-                        label="Select Script Function"
+                        hint="当前脚本仅用于绘制S2S模式T变量数据"
+                        label="选择脚本"
                         class="col-7 col-sm-6 q-ma-sm"
                       />
                       <div
@@ -117,20 +112,20 @@
                       <!-- buttons -->
                       <div class="row col-12 q-ma-sm items-start taskForm-footer">
                         <q-btn
-                          label="Run"
+                          label="运行"
                           :disabled="taskForm.disabled"
                           @click="onScriptSubmit(taskForm)"
                           color="primary"
                         />
                         <q-btn
-                          label="Reset"
+                          label="重置"
                           @click="onScriptReset(taskForm)"
                           color="primary"
                           flat
                           class="q-ml-sm"
                         />
                         <q-btn
-                          label="Remove"
+                          label="移除"
                           @click="onScriptRemove(taskForm.key)"
                           color="red"
                           flat
@@ -146,14 +141,13 @@
           <q-separator vertical inset class="q-ma-sm" />
           <div class="col-12 col-sm">
             <div class="q-pa-sm">
+              <q-inner-loading :showing="taskForm.showRunning">
+                <q-spinner-gears color="primary" size="6em" />
+              </q-inner-loading>
               <!-- Result Pictures -->
               <div class="text-bold q-ma-sm">{{taskForm.scriptOutputFile}}</div>
               <!-- <q-img :src=" '../statics/data/' + taskForm.scriptOutputFile" spinner-color="white" /> -->
-              <q-img
-                v-if="taskForm.scriptOutputFile == 'run script to generate image'"
-                src
-                spinner-color="white"
-              />
+              <q-img v-if="taskForm.scriptOutputFile == '' || taskForm.scriptOutputFile == '运行失败'" src spinner-color="white" />
               <q-img
                 v-else
                 :src="`http://166.111.7.72:5000/online-ncl/ncl-wrapper/getImage?filename=${taskForm.scriptOutputFile}`"
@@ -218,12 +212,12 @@ function updateAllTaskExpandedState(taskForms) {
       all_expanded = all_expanded && taskForms[i].expanded;
       has_expanded = has_expanded || taskForms[i].expanded;
     }
-    if (all_expanded) return "Expanded";
-    else if (!has_expanded) return "Folded";
-    else return "Expanded Not Set";
+    if (all_expanded) return "展开";
+    else if (!has_expanded) return "折叠";
+    else return "待确定展开状态";
     return;
   }
-  return "Expanded";
+  return "展开";
 }
 
 export default {
@@ -232,7 +226,7 @@ export default {
     return {
       tickedLabels: [],
       taskForms: [],
-      allTaskExpanded: "Expanded",
+      allTaskExpanded: "展开",
       drawingScripts: drawingscripts,
       modelFileFilters: [
         {
@@ -291,20 +285,10 @@ export default {
             }
           });
       } else {
-        this.$q
-          .dialog({
-            title: "Alert",
-            message: "Please select all filters"
-          })
-          .onOk(() => {
-            console.log("OK");
-          })
-          .onCancel(() => {
-            console.log("Cancel");
-          })
-          .onDismiss(() => {
-            console.log("I am triggered on both OK and Cancel");
-          });
+        this.$q.dialog({
+          title: "注意",
+          message: "请选择所有筛选项"
+        });
       }
     },
     onTickedUpdate(ticked) {
@@ -337,7 +321,8 @@ export default {
             scriptsInfo: JSON.parse(
               JSON.stringify(this.drawingScripts.scriptsInfo)
             ),
-            scriptOutputFile: "run script to generate image",
+            scriptOutputFile: "",
+            showRunning: false,
             disabled: false,
             expanded: true
           });
@@ -359,11 +344,11 @@ export default {
       this.allTaskExpanded = updateAllTaskExpandedState(this.taskForms);
     },
     onAllTaskExpandedToggle(state) {
-      if (state == "Expanded") {
+      if (state == "展开") {
         for (let i in this.taskForms) {
           this.taskForms[i].expanded = true;
         }
-      } else if (state == "Folded") {
+      } else if (state == "折叠") {
         for (let i in this.taskForms) {
           this.taskForms[i].expanded = false;
         }
@@ -376,6 +361,8 @@ export default {
     onScriptSubmit(taskForm) {
       // disable run button
       taskForm.disabled = true;
+      // remove outputfile
+      taskForm.scriptOutputFile = ""
       // generate filename, scriptname, parameters, outputfile for api
       let filename = taskForm.info.path;
       let scriptname = taskForm.selectedScript;
@@ -417,11 +404,9 @@ export default {
         outputfilename: outputfile,
         parameters: parameters
       };
+      // show spinner
+      taskForm.showRunning = true;
 
-      this.$q.loading.show({
-        message:
-          'NCL Scripg <b>Running</b>.<br/><span class="text-primary">Hang on...</span>'
-      });
       fetch(url, {
         method: "POST", // or 'PUT'
         body: JSON.stringify(postdata), // data can be `string` or {object}!
@@ -432,18 +417,16 @@ export default {
         .then(res => res.json())
         .catch(error => console.error("Error:", error))
         .then(response => {
-          this.$q.loading.hide();
+          // disable spinner
+          taskForm.showRunning = false;
           if (response.status == "Success") {
             taskForm.scriptOutputFile = response.outputFilename;
             this.$q.dialog({
-              title: "Result",
-              message: "NCL Script Successfully Executed"
+              title: "结果",
+              message: "运行成功！"
             });
           } else {
-            this.$q.dialog({
-              title: "Result",
-              message: "Script Failed to get output file!"
-            });
+            taskForm.scriptOutputFile = "运行失败";
           }
         });
       // enable run button

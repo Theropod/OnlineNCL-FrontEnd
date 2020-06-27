@@ -5,23 +5,23 @@
     ],
     "scriptsInfo": [
         {
-            "name": "latlon plot",
+            "name": "指定时间段和level绘制",
             "description": "bcccsm T latlon plot\nApplicable to T226 S2S 0406/0408\ndaily_bcccsm_2020040600_T.nc\ndaily_bcccsm_2020040800_T.nc",
             "path": "/work2/theropod/BCC/Operational_Prediction/latlonplot.ncl",
             "parameters": [
                 {
                     "name": "time_start",
-                    "description": "start time index",
+                    "description": "开始时间index",
                     "type": "number",
-                    "hint":"20",
+                    "hint":"e.g. 20",
                     "value": null,
                     "readonly": false
                 },
                 {
                     "name": "time_end",
-                    "description": "end time index",
+                    "description": "结束时间index",
                     "type": "number",
-                    "hint":"25",
+                    "hint":"e.g. 25",
                     "value": null,
                     "readonly": false
                 },
@@ -29,30 +29,30 @@
                     "name": "level_index",
                     "description": "level (hPa)",
                     "type": "number",
-                    "hint":"100,250,300,400",
+                    "hint":"e.g. 100,250,300,400",
                     "value": null,
                     "readonly": false
                 },
                 {
                     "name": "region_code",
-                    "description": "Region to Draw",
+                    "description": "绘制区域",
                     "type": "text",
-                    "hint":"CN",
+                    "hint":"e.g. CN",
                     "value": "CN",
                     "readonly": true
                 }
             ]
         },
         {
-            "name": "average plot",
+            "name": "全部平均绘制",
             "description":"bcccsm T all time average 750hPa\nApplicable to T226 S2S 0406/0408\ndaily_bcccsm_2020040600_T.nc\ndaily_bcccsm_2020040800_T.nc",
             "path": "/work2/theropod/BCC/Operational_Prediction/averageplot.ncl",
             "parameters": [
                 {
                     "name": "region_code",
-                    "description": "Region",
+                    "description": "绘制区域",
                     "type": "text",
-                    "hint":"All",
+                    "hint":"e.g. All",
                     "value": "All",
                     "readonly": true
                 }
