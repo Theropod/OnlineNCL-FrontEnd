@@ -156,7 +156,7 @@
               />
               <q-img
                 v-else
-                :src="`http://166.111.7.71:8080/online-ncl/ncl-wrapper/getImage?filename=${taskForm.scriptOutputFile}`"
+                :src="`http://166.111.7.72:5000/online-ncl/ncl-wrapper/getImage?filename=${taskForm.scriptOutputFile}`"
                 spinner-color="white"
               />
             </div>
@@ -177,7 +177,7 @@ function updateModelFileFilters(modelFileFilters) {
     let selectedFilterValue = modelFileFilters[i].selected;
     if (!selectedFilterValue.length) {
       let url =
-        "http://166.111.7.71:8080/online-ncl/model-file-manager/findModelFileFilter?columnName=" +
+        "http://166.111.7.72:5000/online-ncl/model-file-manager/findModelFileFilter?columnName=" +
         modelFileFilters[i].columnName +
         "&model=" +
         modelFileFilters[0].selected +
@@ -275,7 +275,7 @@ export default {
         modelFileFilters[2].selected.length
       ) {
         let url =
-          "http://166.111.7.71:8080/online-ncl/model-file-manager/findModelFile?model=" +
+          "http://166.111.7.72:5000/online-ncl/model-file-manager/findModelFile?model=" +
           modelFileFilters[0].selected +
           "&startTime=" +
           modelFileFilters[1].selected +
@@ -409,7 +409,7 @@ export default {
       }
       outputfile = outputfile.replace(/ /g, "_");
 
-      let url = "http://166.111.7.71:8080/online-ncl/ncl-wrapper/run";
+      let url = "http://166.111.7.72:5000/online-ncl/ncl-wrapper/run";
       let postdata = {
         filename: filename,
         scriptname: scriptname,
