@@ -14,6 +14,7 @@
             v-model="modelFileFilter.selected"
             :options="modelFileFilter.filterValues"
             :label="modelFileFilter.filterName"
+            :hint="modelFileFilter.hint"
             @input="updateFilters"
           />
         </div>
@@ -147,7 +148,11 @@
               <!-- Result Pictures -->
               <div class="text-bold q-ma-sm">{{taskForm.scriptOutputFile}}</div>
               <!-- <q-img :src=" '../statics/data/' + taskForm.scriptOutputFile" spinner-color="white" /> -->
-              <q-img v-if="taskForm.scriptOutputFile == '' || taskForm.scriptOutputFile == '运行失败'" src spinner-color="white" />
+              <q-img
+                v-if="taskForm.scriptOutputFile == '' || taskForm.scriptOutputFile == '运行失败'"
+                src
+                spinner-color="white"
+              />
               <q-img
                 v-else
                 :src="`http://166.111.7.72:5000/online-ncl/ncl-wrapper/getImage?filename=${taskForm.scriptOutputFile}`"
@@ -231,18 +236,21 @@ export default {
       modelFileFilters: [
         {
           filterName: "model",
+          hint: "e.g. S2S_T226",
           columnName: "model",
           filterValues: [],
           selected: ""
         },
         {
           filterName: "startTime",
+          hint: "e.g. 20200407",
           columnName: "start_time",
           filterValues: [],
           selected: ""
         },
         {
           filterName: "variableName",
+          hint: "e.g. T",
           columnName: "variable_name",
           filterValues: [],
           selected: ""
@@ -260,6 +268,7 @@ export default {
         this.modelFileFilters[i].selected = "";
       }
       updateModelFileFilters(this.modelFileFilters);
+      this.modelFiles = [];
     },
     SearchByFilters() {
       let modelFileFilters = this.modelFileFilters;
@@ -361,76 +370,87 @@ export default {
     onScriptSubmit(taskForm) {
       // disable run button
       taskForm.disabled = true;
-      // remove outputfile
-      taskForm.scriptOutputFile = ""
-      // generate filename, scriptname, parameters, outputfile for api
-      let filename = taskForm.info.path;
-      let scriptname = taskForm.selectedScript;
-      let scriptpath =
-        taskForm.scriptsInfo[taskForm.scripts.indexOf(taskForm.selectedScript)]
-          .path;
-      let parameters =
-        taskForm.scriptsInfo[taskForm.scripts.indexOf(taskForm.selectedScript)]
-          .parameters;
-      // check for empty
-      for (let i in parameters) {
-        let parameter = parameters[i];
-        if (parameter.value == null) {
-          alert(parameter.description + " cannot be empty");
-          return;
-        }
-      }
-      // outputfile: filename_scriptname_parameters.png
-      // filename without extension
-      let outputfile = taskForm.label.substring(
-        0,
-        taskForm.label.lastIndexOf(".")
-      );
-      outputfile = outputfile + "_" + taskForm.selectedScript;
-      // add parameter values
-      for (let i in parameters) {
-        let parameter = parameters[i];
-        if (parameter.value) {
-          outputfile = outputfile + "_" + parameter.value;
-        }
-      }
-      outputfile = outputfile.replace(/ /g, "_");
-
-      let url = "http://166.111.7.72:5000/online-ncl/ncl-wrapper/run";
-      let postdata = {
-        filename: filename,
-        scriptname: scriptname,
-        scriptpath: scriptpath,
-        outputfilename: outputfile,
-        parameters: parameters
-      };
-      // show spinner
-      taskForm.showRunning = true;
-
-      fetch(url, {
-        method: "POST", // or 'PUT'
-        body: JSON.stringify(postdata), // data can be `string` or {object}!
-        headers: new Headers({
-          "Content-Type": "application/json"
-        })
-      })
-        .then(res => res.json())
-        .catch(error => console.error("Error:", error))
-        .then(response => {
-          // disable spinner
-          taskForm.showRunning = false;
-          if (response.status == "Success") {
-            taskForm.scriptOutputFile = response.outputFilename;
-            this.$q.dialog({
-              title: "结果",
-              message: "运行成功！"
-            });
-          } else {
-            taskForm.scriptOutputFile = "运行失败";
+      // temporarily reject tasks whose model file is not supported by NCL Scripts
+      if (
+        taskForm.info.model == "S2S_T226" &&
+        taskForm.info.variableName == "T"
+      ) {
+        // remove outputfile
+        taskForm.scriptOutputFile = "";
+        // generate filename, scriptname, parameters, outputfile for api
+        let filename = taskForm.info.path;
+        let scriptname = taskForm.selectedScript;
+        let scriptpath =
+          taskForm.scriptsInfo[
+            taskForm.scripts.indexOf(taskForm.selectedScript)
+          ].path;
+        let parameters =
+          taskForm.scriptsInfo[
+            taskForm.scripts.indexOf(taskForm.selectedScript)
+          ].parameters;
+        // check for empty
+        for (let i in parameters) {
+          let parameter = parameters[i];
+          if (parameter.value == null) {
+            alert(parameter.description + " cannot be empty");
+            return;
           }
-        });
-      // enable run button
-      taskForm.disabled = false;
+        }
+        // outputfile: filename_scriptname_parameters.png
+        // filename without extension
+        let outputfile = taskForm.label.substring(
+          0,
+          taskForm.label.lastIndexOf(".")
+        );
+        outputfile = outputfile + "_" + taskForm.selectedScript;
+        // add parameter values
+        for (let i in parameters) {
+          let parameter = parameters[i];
+          if (parameter.value) {
+            outputfile = outputfile + "_" + parameter.value;
+          }
+        }
+        outputfile = outputfile.replace(/ /g, "_");
+
+        let url = "http://166.111.7.72:5000/online-ncl/ncl-wrapper/run";
+        let postdata = {
+          filename: filename,
+          scriptname: scriptname,
+          scriptpath: scriptpath,
+          outputfilename: outputfile,
+          parameters: parameters
+        };
+        // show spinner
+        taskForm.showRunning = true;
+
+        fetch(url, {
+          method: "POST", // or 'PUT'
+          body: JSON.stringify(postdata), // data can be `string` or {object}!
+          headers: new Headers({
+            "Content-Type": "application/json"
+          })
+        })
+          .then(res => res.json())
+          .catch(error => console.error("Error:", error))
+          .then(response => {
+            // disable spinner
+            taskForm.showRunning = false;
+            if (response.status == "Success") {
+              taskForm.scriptOutputFile = response.outputFilename;
+              this.$q.dialog({
+                title: "结果",
+                message: "运行成功！"
+              });
+            } else {
+              taskForm.scriptOutputFile = "运行失败";
+            }
+          });
+        // enable run button
+        taskForm.disabled = false;
+      }
+      else {
+        taskForm.scriptOutputFile = "数据不支持，脚本仅用于绘制S2S模式T变量数据";
+       }
     },
     onScriptReset(taskForm) {
       let a = 0;
